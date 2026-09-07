@@ -21,6 +21,9 @@ const isRoot = lang === 'es';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{t.meta.title}</title>
     <meta name="description" content={t.meta.description} />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0e1013" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f3f1ea" media="(prefers-color-scheme: light)" />
     <link rel="canonical" href={canonical} />
     {Object.entries(LANG_ROUTES).map(([code, route]) => <link rel="alternate" hreflang={code} href={absolute(route)} />)}
     <link rel="alternate" hreflang="x-default" href={absolute(LANG_ROUTES.es)} />
@@ -37,12 +40,27 @@ const isRoot = lang === 'es';
     <meta name="twitter:description" content={t.meta.description} />
     <meta name="twitter:image" content={ogImage} />
     <link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml" />
+    <link rel="preload" as="image" href={withBase('art/sumi.webp')} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500&family=Shippori+Mincho:wght@500;700&display=swap"
       rel="stylesheet"
     />
+    {
+      /* Tema: se decide antes de pintar para que no haya parpadeo. Prioridad: elección guardada > preferencia del sistema. */
+    }
+    <script is:inline>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var theme = saved === 'light' || saved === 'dark' ? saved : matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          document.documentElement.dataset.theme = theme;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
     {
       /* En la raíz: si el visitante llega desde fuera y ya eligió otro idioma (o su navegador está en EN/JA),
          se le envía a esa versión antes de pintar nada. Navegar dentro del sitio nunca redirige. */
@@ -70,5 +88,115 @@ const isRoot = lang === 'es';
   </head>
   <body>
     <slot />
+    <script>
+      // Comportamiento de la página: tema, navegación activa, aparición al hacer scroll,
+      // parallax suave del cuadro, copiar correo y relojes. Todo opcional: sin JS la página es completa.
+      const root = document.documentElement;
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Tema
+      document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
+        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try {
+          localStorage.setItem('theme', next);
+        } catch {}
+      });
+
+      // Cabecera: sombra al despegarse del borde
+      const header = document.querySelector('.top');
+      const links = [...document.querySelectorAll<HTMLAnchorElement>('.nav a[href^="#"]')];
+      const onScroll = () => {
+        header?.classList.toggle('is-stuck', scrollY > 8);
+        if (scrollY < 120) links.forEach((a) => a.removeAttribute('aria-current'));
+      };
+      onScroll();
+      addEventListener('scroll', onScroll, { passive: true });
+
+      // Sección activa en la navegación
+      const sections = links.map((a) => document.querySelector<HTMLElement>(a.hash)).filter((s): s is HTMLElement => !!s);
+      if (sections.length) {
+        const spy = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (!e.isIntersecting) continue;
+              links.forEach((a) => (a.hash === '#' + e.target.id ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+            }
+          },
+          { rootMargin: '-40% 0px -55% 0px' },
+        );
+        sections.forEach((s) => spy.observe(s));
+      }
+
+      // Aparición progresiva
+      const revealables = document.querySelectorAll('.reveal');
+      if (reduced || !('IntersectionObserver' in window)) {
+        revealables.forEach((el) => el.classList.add('in'));
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              // Visible, o ya quedó por encima del viewport (salto directo a un ancla): se muestra.
+              if (e.isIntersecting || e.boundingClientRect.bottom < 0) {
+                e.target.classList.add('in');
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+        );
+        revealables.forEach((el) => io.observe(el));
+      }
+
+      // Parallax del cuadro del hero
+      const art = document.querySelector<HTMLElement>('.art-frame img');
+      if (art && !reduced && matchMedia('(min-width: 900px)').matches) {
+        let ticking = false;
+        const move = () => {
+          art.style.transform = `translate3d(0, ${Math.min(scrollY, 900) * -0.05}px, 0) scale(1.06)`;
+          ticking = false;
+        };
+        addEventListener(
+          'scroll',
+          () => {
+            if (!ticking) {
+              requestAnimationFrame(move);
+              ticking = true;
+            }
+          },
+          { passive: true },
+        );
+        move();
+      }
+
+      // Copiar correo
+      document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+        const label = btn.textContent;
+        btn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(btn.dataset.copy || '');
+            btn.textContent = btn.dataset.copied || label;
+            btn.classList.add('done');
+            setTimeout(() => {
+              btn.textContent = label;
+              btn.classList.remove('done');
+            }, 1600);
+          } catch {}
+        });
+      });
+
+      // Relojes Lima / Tokio
+      const clocks = document.querySelectorAll<HTMLElement>('[data-tz]');
+      if (clocks.length) {
+        const tick = () => {
+          const now = new Date();
+          clocks.forEach((el) => {
+            el.textContent = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: el.dataset.tz }).format(now);
+          });
+        };
+        tick();
+        setInterval(tick, 15000);
+      }
+    </script>
   </body>
 </html>

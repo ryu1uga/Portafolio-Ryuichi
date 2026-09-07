@@ -8,7 +8,11 @@ Sitio personal hecho con Astro y React. Tres idiomas, cada uno en su propia URL:
 | English | `/en/` |
 | 日本語 | `/ja/` |
 
-React se usa solo para escribir la página como componente: se renderiza en build y no envía JavaScript al navegador, salvo dos scripts inline de unas pocas líneas que recuerdan el idioma elegido.
+React se usa solo para escribir la página como componente: se renderiza en build. El único JavaScript que llega al navegador es un script pequeño (tema claro/oscuro, sección activa, aparición al hacer scroll, parallax del cuadro, copiar correo y relojes Lima/Tokio) más dos inline que recuerdan idioma y tema. Sin JS la página se ve completa.
+
+## Diseño
+
+Identidad nikkei en clave editorial: tinta sobre carbón (tema oscuro por defecto) o sobre papel washi (tema claro, también sigue la preferencia del sistema). Tipografías Shippori Mincho (títulos), IBM Plex Sans JP (texto) y IBM Plex Mono (metadatos). El hero lleva un cuadro sumi-e de la Costa Verde bajo la garúa con la firma en kanji y el sello; el bloque de contacto, una pincelada bermellón. Ambas imágenes se generaron con Higgsfield y viven en `public/art/`.
 
 ## Comandos
 
@@ -28,6 +32,7 @@ npm run preview  # sirve dist/ para revisar
 - `src/pages/index.astro` y `src/pages/[lang]/index.astro`: una página por idioma.
 - `src/lib/paths.ts`: rutas con `base` y URLs absolutas. Cualquier enlace o asset interno pasa por `withBase()`.
 - `public/ryuichi.webp`: foto del hero (400 px). `public/ryuichi-og.jpg`: imagen para Open Graph (800 px).
+- `public/art/sumi.webp` y `public/art/stroke.webp`: cuadro del hero y pincelada del bloque de contacto.
 - `public/sitemap.xml` y `public/robots.txt`: estáticos; si cambian las rutas, actualizarlos a mano.
 
 ## Despliegue
