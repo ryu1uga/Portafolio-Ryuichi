@@ -1,0 +1,9 @@
+---
+import Base from '../layouts/Base.astro';
+import Portfolio from '../components/Portfolio';
+import { LANG_PATHS, withBase } from '../lib/paths';
+---
+
+<Base lang="es">
+  <Portfolio lang="es" paths={LANG_PATHS} photo={withBase('ryuichi.webp')} />
+</Base>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ryu1uga.github.io/Portafolio-Ryuichi/sitemap.xml

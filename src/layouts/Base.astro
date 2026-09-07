@@ -1,0 +1,74 @@
+---
+import '../styles/global.css';
+import { content, type Lang } from '../content/site';
+import { LANG_PATHS, LANG_ROUTES, withBase, absolute } from '../lib/paths';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = content[lang];
+const canonical = absolute(LANG_ROUTES[lang]);
+const ogImage = absolute('ryuichi-og.jpg');
+const isRoot = lang === 'es';
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.meta.title}</title>
+    <meta name="description" content={t.meta.description} />
+    <link rel="canonical" href={canonical} />
+    {Object.entries(LANG_ROUTES).map(([code, route]) => <link rel="alternate" hreflang={code} href={absolute(route)} />)}
+    <link rel="alternate" hreflang="x-default" href={absolute(LANG_ROUTES.es)} />
+    <meta property="og:type" content="profile" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={t.meta.title} />
+    <meta property="og:description" content={t.meta.description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="800" />
+    <meta property="og:locale" content={{ es: 'es_PE', en: 'en_US', ja: 'ja_JP' }[lang]} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={t.meta.title} />
+    <meta name="twitter:description" content={t.meta.description} />
+    <meta name="twitter:image" content={ogImage} />
+    <link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    {
+      /* En la raíz: si el visitante llega desde fuera y ya eligió otro idioma (o su navegador está en EN/JA),
+         se le envía a esa versión antes de pintar nada. Navegar dentro del sitio nunca redirige. */
+      isRoot && (
+        <script is:inline define:vars={{ paths: LANG_PATHS }}>
+          (function () {
+            try {
+              var ref = document.referrer;
+              var internal = ref && new URL(ref).origin === location.origin;
+              if (internal) return;
+              var saved = localStorage.getItem('lang');
+              var nav = (navigator.language || '').slice(0, 2);
+              var pick = saved || nav;
+              if ((pick === 'en' || pick === 'ja') && paths[pick]) location.replace(paths[pick]);
+            } catch (e) {}
+          })();
+        </script>
+      )
+    }
+    <script is:inline define:vars={{ lang }}>
+      try {
+        localStorage.setItem('lang', lang);
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

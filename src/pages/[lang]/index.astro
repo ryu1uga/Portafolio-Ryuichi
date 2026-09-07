@@ -1,0 +1,17 @@
+---
+import Base from '../../layouts/Base.astro';
+import Portfolio from '../../components/Portfolio';
+import { LANG_PATHS, withBase } from '../../lib/paths';
+import type { Lang } from '../../content/site';
+
+// El español vive en la raíz (src/pages/index.astro); aquí solo /en/ y /ja/.
+export function getStaticPaths() {
+  return [{ params: { lang: 'en' } }, { params: { lang: 'ja' } }];
+}
+
+const lang = Astro.params.lang as Lang;
+---
+
+<Base lang={lang}>
+  <Portfolio lang={lang} paths={LANG_PATHS} photo={withBase('ryuichi.webp')} />
+</Base>
