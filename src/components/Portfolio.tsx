@@ -273,10 +273,10 @@ export default function Portfolio({ lang, paths, photo, art, stroke }: Props) {
             </div>
             <div className="contact-links">
               <a className="pill" href={t.contact.github}>
-                github.com/ryu1uga <Arrow />
+                GitHub<Arrow />
               </a>
               <a className="pill" href={t.contact.linkedin}>
-                linkedin.com/in/ryuichi-oshiro-ugamoto <Arrow />
+                LinkedIn <Arrow />
               </a>
             </div>
           </div>

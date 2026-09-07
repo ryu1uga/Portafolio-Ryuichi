@@ -52,19 +52,19 @@ const stackGroups = {
     { label: 'Backend', items: ['C# / .NET', 'Python / FastAPI', 'Kotlin / Spring Boot', 'TypeScript / Node.js'] },
     { label: 'Datos e infraestructura', items: ['PostgreSQL', 'Docker', 'OpenShift', 'Git', 'Gradle'] },
     { label: 'Frontend y móvil', items: ['React', 'React Native / Expo', 'Three.js'] },
-    { label: 'Herramientas', items: ['Claude Code', 'MCP', 'Obsidian', 'Clip Studio Paint', 'Photoshop', 'InDesign'] },
+    { label: 'Herramientas', items: ['Claude Code', 'MCP', 'Photoshop', 'InDesign'] },
   ],
   en: [
     { label: 'Backend', items: ['C# / .NET', 'Python / FastAPI', 'Kotlin / Spring Boot', 'TypeScript / Node.js'] },
     { label: 'Data and infrastructure', items: ['PostgreSQL', 'Docker', 'OpenShift', 'Git', 'Gradle'] },
     { label: 'Frontend and mobile', items: ['React', 'React Native / Expo', 'Three.js'] },
-    { label: 'Tools', items: ['Claude Code', 'MCP', 'Obsidian', 'Clip Studio Paint', 'Photoshop', 'InDesign'] },
+    { label: 'Tools', items: ['Claude Code', 'MCP', 'Photoshop', 'InDesign'] },
   ],
   ja: [
     { label: 'バックエンド', items: ['C# / .NET', 'Python / FastAPI', 'Kotlin / Spring Boot', 'TypeScript / Node.js'] },
     { label: 'データ・インフラ', items: ['PostgreSQL', 'Docker', 'OpenShift', 'Git', 'Gradle'] },
     { label: 'フロントエンド・モバイル', items: ['React', 'React Native / Expo', 'Three.js'] },
-    { label: 'ツール', items: ['Claude Code', 'MCP', 'Obsidian', 'Clip Studio Paint', 'Photoshop', 'InDesign'] },
+    { label: 'ツール', items: ['Claude Code', 'MCP', 'Photoshop', 'InDesign'] },
   ],
 };
 
