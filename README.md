@@ -28,6 +28,8 @@ npm run preview  # sirve dist/ para revisar
 - `src/content/site.ts`: todo el texto en los tres idiomas (ES / EN / JA), incluidos título y descripción de la página. Es el único archivo que hay que tocar para cambiar contenido.
 - `src/styles/global.css`: colores, tipografías y layout.
 - `src/components/Portfolio.tsx`: estructura de la página y selector de idioma.
+- `src/styles/motion.css`: todas las animaciones y transiciones (telón de entrada, hero, cinta del stack, aparición con scroll, cambio de tema e idioma). Los tiempos se ajustan aquí.
+- `src/scripts/motion.ts`: lo que necesita JS (trazo de pincel del puntero, inclinación de tarjetas, progreso de scroll, cinta). Sin JS o con "reducir movimiento" activado, la página se ve completa y quieta.
 - `src/layouts/Base.astro`: `<head>` (metadatos, Open Graph, hreflang, fuentes) y el script que recuerda el idioma.
 - `src/pages/index.astro` y `src/pages/[lang]/index.astro`: una página por idioma.
 - `src/lib/paths.ts`: rutas con `base` y URLs absolutas. Cualquier enlace o asset interno pasa por `withBase()`.

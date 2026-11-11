@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import '../styles/motion.css';
 import { content, type Lang } from '../content/site';
 import { LANG_PATHS, LANG_ROUTES, withBase, absolute } from '../lib/paths';
 
@@ -62,6 +63,38 @@ const isRoot = lang === 'es';
       })();
     </script>
     {
+      /* Movimiento: se decide antes de pintar qué coreografía toca (ver src/styles/motion.css).
+         .motion = hay JS y no se pidió reducir movimiento; .intro = primera visita de la sesión (telón);
+         .quick = se viene de otra página del sitio (cambio de idioma), sin entrada del hero. */
+    }
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        d.classList.add('motion');
+        var internal = false;
+        var seen = true;
+        try {
+          internal = !!document.referrer && new URL(document.referrer).origin === location.origin;
+        } catch (e) {}
+        try {
+          if (sessionStorage.getItem('redirected')) {
+            sessionStorage.removeItem('redirected');
+            internal = false;
+          }
+          seen = sessionStorage.getItem('intro') === '1';
+          sessionStorage.setItem('intro', '1');
+        } catch (e) {}
+        if (internal) d.classList.add('quick');
+        else if (!seen) d.classList.add('intro');
+        // Si el módulo de movimiento no llega a cargar, no se deja nada oculto.
+        setTimeout(function () {
+          if (!window.__motion) d.classList.remove('motion', 'intro');
+        }, 4000);
+      })();
+    </script>
+    {
       /* En la raíz: si el visitante llega desde fuera y ya eligió otro idioma (o su navegador está en EN/JA),
          se le envía a esa versión antes de pintar nada. Navegar dentro del sitio nunca redirige. */
       isRoot && (
@@ -74,7 +107,12 @@ const isRoot = lang === 'es';
               var saved = localStorage.getItem('lang');
               var nav = (navigator.language || '').slice(0, 2);
               var pick = saved || nav;
-              if ((pick === 'en' || pick === 'ja') && paths[pick]) location.replace(paths[pick]);
+              if ((pick === 'en' || pick === 'ja') && paths[pick]) {
+                // La página de destino debe tratarse como primera visita, no como navegación interna.
+                sessionStorage.removeItem('intro');
+                sessionStorage.setItem('redirected', '1');
+                location.replace(paths[pick]);
+              }
             } catch (e) {}
           })();
         </script>
@@ -88,115 +126,22 @@ const isRoot = lang === 'es';
   </head>
   <body>
     <slot />
-    <script>
-      // Comportamiento de la página: tema, navegación activa, aparición al hacer scroll,
-      // parallax suave del cuadro, copiar correo y relojes. Todo opcional: sin JS la página es completa.
-      const root = document.documentElement;
-      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      // Tema
-      document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
-        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-        root.dataset.theme = next;
+    {
+      /* Al cambiar de idioma se vuelve a la misma altura de lectura, antes del primer pintado. */
+    }
+    <script is:inline>
+      (function () {
         try {
-          localStorage.setItem('theme', next);
-        } catch {}
-      });
-
-      // Cabecera: sombra al despegarse del borde
-      const header = document.querySelector('.top');
-      const links = [...document.querySelectorAll<HTMLAnchorElement>('.nav a[href^="#"]')];
-      const onScroll = () => {
-        header?.classList.toggle('is-stuck', scrollY > 8);
-        if (scrollY < 120) links.forEach((a) => a.removeAttribute('aria-current'));
-      };
-      onScroll();
-      addEventListener('scroll', onScroll, { passive: true });
-
-      // Sección activa en la navegación
-      const sections = links.map((a) => document.querySelector<HTMLElement>(a.hash)).filter((s): s is HTMLElement => !!s);
-      if (sections.length) {
-        const spy = new IntersectionObserver(
-          (entries) => {
-            for (const e of entries) {
-              if (!e.isIntersecting) continue;
-              links.forEach((a) => (a.hash === '#' + e.target.id ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
-            }
-          },
-          { rootMargin: '-40% 0px -55% 0px' },
-        );
-        sections.forEach((s) => spy.observe(s));
-      }
-
-      // Aparición progresiva
-      const revealables = document.querySelectorAll('.reveal');
-      if (reduced || !('IntersectionObserver' in window)) {
-        revealables.forEach((el) => el.classList.add('in'));
-      } else {
-        const io = new IntersectionObserver(
-          (entries) => {
-            for (const e of entries) {
-              // Visible, o ya quedó por encima del viewport (salto directo a un ancla): se muestra.
-              if (e.isIntersecting || e.boundingClientRect.bottom < 0) {
-                e.target.classList.add('in');
-                io.unobserve(e.target);
-              }
-            }
-          },
-          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
-        );
-        revealables.forEach((el) => io.observe(el));
-      }
-
-      // Parallax del cuadro del hero
-      const art = document.querySelector<HTMLElement>('.art-frame img');
-      if (art && !reduced && matchMedia('(min-width: 900px)').matches) {
-        let ticking = false;
-        const move = () => {
-          art.style.transform = `translate3d(0, ${Math.min(scrollY, 900) * -0.05}px, 0) scale(1.06)`;
-          ticking = false;
-        };
-        addEventListener(
-          'scroll',
-          () => {
-            if (!ticking) {
-              requestAnimationFrame(move);
-              ticking = true;
-            }
-          },
-          { passive: true },
-        );
-        move();
-      }
-
-      // Copiar correo
-      document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
-        const label = btn.textContent;
-        btn.addEventListener('click', async () => {
-          try {
-            await navigator.clipboard.writeText(btn.dataset.copy || '');
-            btn.textContent = btn.dataset.copied || label;
-            btn.classList.add('done');
-            setTimeout(() => {
-              btn.textContent = label;
-              btn.classList.remove('done');
-            }, 1600);
-          } catch {}
-        });
-      });
-
-      // Relojes Lima / Tokio
-      const clocks = document.querySelectorAll<HTMLElement>('[data-tz]');
-      if (clocks.length) {
-        const tick = () => {
-          const now = new Date();
-          clocks.forEach((el) => {
-            el.textContent = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: el.dataset.tz }).format(now);
-          });
-        };
-        tick();
-        setInterval(tick, 15000);
-      }
+          var keep = sessionStorage.getItem('keep-scroll');
+          if (keep === null) return;
+          sessionStorage.removeItem('keep-scroll');
+          var max = document.documentElement.scrollHeight - innerHeight;
+          if (max > 0 && +keep > 0) scrollTo({ top: +keep * max, behavior: 'instant' });
+        } catch (e) {}
+      })();
+    </script>
+    <script>
+      import '../scripts/motion';
     </script>
   </body>
 </html>

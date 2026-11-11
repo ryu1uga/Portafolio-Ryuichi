@@ -249,26 +249,9 @@ a:hover .arrow {
   transition: color 0.25s;
 }
 
-.nav a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -0.1rem;
-  height: 1.5px;
-  background: var(--accent);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.35s var(--ease);
-}
-
 .nav a:hover,
 .nav a[aria-current] {
   color: var(--ink);
-}
-
-.nav a[aria-current]::after {
-  transform: scaleX(1);
 }
 
 .controls {
@@ -353,7 +336,6 @@ a:hover .arrow {
   letter-spacing: 0.08em;
   color: var(--accent-ink);
   margin-bottom: 1.4rem;
-  animation: rise 0.9s var(--ease) both;
 }
 
 .hero h1 {
@@ -361,7 +343,6 @@ a:hover .arrow {
   line-height: 1.04;
   letter-spacing: -0.02em;
   max-width: 11ch;
-  animation: rise 0.9s var(--ease) 0.08s both;
 }
 
 .hero .role {
@@ -369,14 +350,12 @@ a:hover .arrow {
   font-size: clamp(1.05rem, 1.6vw, 1.3rem);
   color: var(--ink-2);
   margin-top: 1.1rem;
-  animation: rise 0.9s var(--ease) 0.16s both;
 }
 
 .hero .intro {
   margin-top: 1.6rem;
   max-width: 34rem;
   color: var(--ink-2);
-  animation: rise 0.9s var(--ease) 0.24s both;
 }
 
 .hero-links {
@@ -385,7 +364,6 @@ a:hover .arrow {
   align-items: center;
   gap: 0.6rem;
   margin-top: 2rem;
-  animation: rise 0.9s var(--ease) 0.32s both;
 }
 
 .location {
@@ -405,19 +383,17 @@ a:hover .arrow {
   font-size: 0.86rem;
   color: var(--ink);
   background: transparent;
-  transition: border-color 0.25s, background-color 0.25s, transform 0.4s var(--ease);
+  transition: border-color 0.25s, background-color 0.25s, translate 0.45s var(--ease);
 }
 
 .pill:hover {
   border-color: var(--accent);
   background: var(--accent-soft);
-  transform: translateY(-1px);
 }
 
 .art {
   position: relative;
   margin: 0;
-  animation: fade 1.4s var(--ease) 0.2s both;
 }
 
 .art-frame {
@@ -436,7 +412,7 @@ a:hover .arrow {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.06);
+  transform: translate3d(0, var(--py, 0px), 0) scale(1.06);
   transform-origin: center;
   will-change: transform;
 }
@@ -812,7 +788,7 @@ a:hover .arrow {
   border: 1px solid var(--rule);
   border-radius: 10px;
   background: color-mix(in srgb, var(--bg-2) 70%, transparent);
-  transition: border-color 0.35s, transform 0.5s var(--ease), box-shadow 0.5s var(--ease);
+  transition: border-color 0.35s, transform 0.6s var(--ease), box-shadow 0.5s var(--ease);
   overflow: hidden;
 }
 
@@ -831,7 +807,6 @@ a:hover .arrow {
 
 .project:hover {
   border-color: var(--rule-strong);
-  transform: translateY(-2px);
   box-shadow: var(--shadow);
 }
 
@@ -1004,58 +979,6 @@ a:hover .arrow {
 .foot-name {
   font-family: var(--serif);
   letter-spacing: 0;
-}
-
-/* ---------------------------------------------------------------------------
-   Aparición al hacer scroll (sin JS todo se ve; con reduced-motion no se anima)
---------------------------------------------------------------------------- */
-@media (prefers-reduced-motion: no-preference) {
-  .reveal {
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
-  }
-
-  .reveal.in {
-    opacity: 1;
-    transform: none;
-  }
-
-  .projects .project:nth-child(2) {
-    transition-delay: 0.08s;
-  }
-
-  .projects .project:nth-child(3) {
-    transition-delay: 0.16s;
-  }
-
-  .stack-grid .stack-group:nth-child(2) {
-    transition-delay: 0.08s;
-  }
-
-  .stack-grid .stack-group:nth-child(3) {
-    transition-delay: 0.16s;
-  }
-
-  .stack-grid .stack-group:nth-child(4) {
-    transition-delay: 0.24s;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .overline,
-  .hero h1,
-  .hero .role,
-  .hero .intro,
-  .hero-links,
-  .art {
-    animation: none;
-  }
-
-  .scroll-cue i::after {
-    animation: none;
-    transform: none;
-  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -1244,10 +1167,6 @@ a:hover .arrow {
     position: static;
   }
 
-  .reveal {
-    opacity: 1 !important;
-    transform: none !important;
-  }
 
   .project,
   .stack-group {
